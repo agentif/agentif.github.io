@@ -1,0 +1,24 @@
+{
+    "overall": {
+        "accuracy": 0.584190966266438,
+        "correct": 4087,
+        "total": 6996
+    },
+    "by_dimension": {
+        "example_driven": {
+            "accuracy": 0.6151898734177215,
+            "correct": 486,
+            "total": 790
+        },
+        "conditional": {
+            "accuracy": 0.3409090909090909,
+            "correct": 225,
+            "total": 660
+        },
+        "unconditional": {
+            "accuracy": 0.6087270104579877,
+            "correct": 3376,
+            "total": 5546
+        }
+    }
+}

@@ -3,20 +3,17 @@
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
 layout: home
-title: AgentIF
+title: Home
 ---
 
-<div align="center">
+<div>
 
-<a href="https://github.com/THU-KEG/AgentIF/">AgentIF Team</a>
-
-<br>
-
-Arxiv: <a href="https://arxiv.org/abs/2505.16944">AGENTIF: Benchmarking Instruction Following of Large Language Models in Agentic Scenarios</a>
-
-<br>
-
-Github: <a href="https://github.com/THU-KEG/AgentIF/">Code</a>
+<p align="center">
+  👥 <a href="https://github.com/THU-KEG/AgentIF/" target="_blank" rel="noopener noreferrer nofollow">AgentIF Team</a> •
+  📚 <a href="https://arxiv.org/abs/2505.16944" target="_blank" rel="noopener noreferrer nofollow">AgentIF Paper</a> •
+  <img src="images/github.png" width=15> <a href="https://github.com/THU-KEG/AgentIF/" target="_blank" rel="noopener noreferrer nofollow">Code</a> •
+  📊 <a href="https://huggingface.co/datasets/THU-KEG/AgentIF" target="_blank" rel="noopener noreferrer nofollow">AgentIF Dataset</a>
+</p>
 
 </div>
 
@@ -37,6 +34,9 @@ An example instruction of AgentIF:
 
 #### Performance Across Constraint Categories
 
+- Press each model to get its latest results. Or press this key to reach the depository of all results: 
+<a href="https://github.com/agentif/agentif.github.io/tree/main/docs/results" target="_blank" rel="noopener noreferrer nofollow">Results</a>
+
 <table>
   <thead>
     <tr>
@@ -56,21 +56,35 @@ An example instruction of AgentIF:
     </tr>
   </thead>
   <tbody>
-    <tr><td>[T] o1-mini</td><td>59.8</td><td>37.5</td><td>80.8</td><td>66.1</td><td>59.1</td><td>43.2</td><td>26.9</td><td>59.8</td></tr>
-    <tr><td>[N] GPT-4o</td><td>58.0</td><td>35.1</td><td>80.8</td><td>65.8</td><td>56.5</td><td>43.2</td><td>26.4</td><td>58.5</td></tr>
-    <tr><td>[N] Qwen3-32B</td><td>57.5</td><td>41.1</td><td>80.6</td><td>57.7</td><td>62.5</td><td>45.7</td><td>24.9</td><td>58.4</td></tr>
-    <tr><td>[T] QwQ-32B</td><td>57.5</td><td>35.6</td><td>82.7</td><td>61.4</td><td>59.4</td><td>43.2</td><td>27.2</td><td>58.1</td></tr>
-    <tr><td>[T] DeepSeek-R1</td><td>56.1</td><td>41.4</td><td>87.0</td><td>61.4</td><td>58.9</td><td>44.4</td><td>22.2</td><td>57.9</td></tr>
-    <tr><td>[T] GLM-Z1-32B</td><td>56.7</td><td>37.9</td><td>83.6</td><td>60.2</td><td>59.6</td><td>43.1</td><td>23.8</td><td>57.8</td></tr>
-    <tr><td>[N] DeepSeek-V3</td><td>54.9</td><td>41.5</td><td>84.5</td><td>59.3</td><td>58.9</td><td>40.8</td><td>21.9</td><td>56.7</td></tr>
-    <tr><td>[N] Claude-3-5-Sonnet</td><td>57.3</td><td>36.9</td><td>69.2</td><td>61.5</td><td>56.0</td><td>43.3</td><td>24.9</td><td>56.6</td></tr>
-    <tr><td>[N] Meta-Llama-3.1-70B-Instruct</td><td>55.1</td><td>35.0</td><td>84.3</td><td>61.6</td><td>55.6</td><td>42.8</td><td>20.9</td><td>56.3</td></tr>
-    <tr><td>[T] DeepSeek-R1-Distill-Qwen-32B</td><td>54.5</td><td>39.6</td><td>73.1</td><td>55.7</td><td>57.2</td><td>45.2</td><td>20.7</td><td>55.1</td></tr>
-    <tr><td>[T] DeepSeek-R1-Distill-Llama-70B</td><td>55.4</td><td>37.7</td><td>69.2</td><td>56.5</td><td>56.6</td><td>44.1</td><td>19.9</td><td>55.0</td></tr>
-    <tr><td>[N] Meta-Llama-3.1-8B-Instruct</td><td>53.5</td><td>36.6</td><td>71.4</td><td>55.6</td><td>54.8</td><td>43.5</td><td>19.9</td><td>53.6</td></tr>
-    <tr><td>[S] Crab-DPO-7B</td><td>48.3</td><td>24.3</td><td>57.5</td><td>48.8</td><td>47.4</td><td>41.9</td><td>10.1</td><td>47.2</td></tr>
-    <tr><td>[N] Mistral-7B-Instruct-v0.3</td><td>47.9</td><td>29.2</td><td>53.8</td><td>47.0</td><td>48.6</td><td>39.8</td><td>11.5</td><td>46.8</td></tr>
-    <tr><td>[S] Conifer-DPO-7B</td><td>45.6</td><td>27.0</td><td>50.5</td><td>42.0</td><td>46.9</td><td>41.8</td><td>10.7</td><td>44.3</td></tr>
+    <tr><td>[T] <a href="results/o1-mini_gpt4o.zip" download>o1-mini</a></td><td>59.8</td><td>37.5</td><td>80.8</td><td>66.1</td><td>59.1</td><td>43.2</td><td>26.9</td><td>59.8</td></tr>
+    <tr><td>[N] <a href="results/gpt-4o-2024-11-20_gpt4o.zip" download>GPT-4o</a></td>
+    <td>58.0</td><td>35.1</td><td>80.8</td><td>65.8</td><td>56.5</td><td>43.2</td><td>26.4</td><td>58.5</td></tr>
+    <tr><td>[N] <a href="results/Qwen3-32B_gpt4o.zip" download>Qwen3-32B</a></td>
+    <td>57.5</td><td>41.1</td><td>80.6</td><td>57.7</td><td>62.5</td><td>45.7</td><td>24.9</td><td>58.4</td></tr>
+    <tr><td>[T] <a href="results/QwQ-32B_gpt4o.zip" download>QwQ-32B</a></td>
+    <td>57.5</td><td>35.6</td><td>82.7</td><td>61.4</td><td>59.4</td><td>43.2</td><td>27.2</td><td>58.1</td></tr>
+    <tr><td>[T] <a href="results/deepseek-r1_gpt4o.zip" download>DeepSeek-R1</a></td>
+    <td>56.1</td><td>41.4</td><td>87.0</td><td>61.4</td><td>58.9</td><td>44.4</td><td>22.2</td><td>57.9</td></tr>
+    <tr><td>[T] <a href="results/GLM-Z1-32B-0414_gpt4o.zip" download>GLM-Z1-32B</a></td>
+    <td>56.7</td><td>37.9</td><td>83.6</td><td>60.2</td><td>59.6</td><td>43.1</td><td>23.8</td><td>57.8</td></tr>
+    <tr><td>[N] <a href="results/deepseek-v3-250324_gpt4o.zip" download>DeepSeek-V3</a></td>
+    <td>54.9</td><td>41.5</td><td>84.5</td><td>59.3</td><td>58.9</td><td>40.8</td><td>21.9</td><td>56.7</td></tr>
+    <tr><td>[N] <a href="results/claude-3-5-sonnet-20241022_gpt4o.zip" download>Claude-3-5-Sonnet</a></td>
+    <td>57.3</td><td>36.9</td><td>69.2</td><td>61.5</td><td>56.0</td><td>43.3</td><td>24.9</td><td>56.6</td></tr>
+    <tr><td>[N] <a href="results/Meta-Llama-3.1-70B-Instruct_gpt4o.zip" download>Meta-Llama-3.1-70B-Instruct</a></td>
+    <td>55.1</td><td>35.0</td><td>84.3</td><td>61.6</td><td>55.6</td><td>42.8</td><td>20.9</td><td>56.3</td></tr>
+    <tr><td>[T] <a href="results/DeepSeek-R1-Distill-Qwen-32B_gpt4o.zip" download>DeepSeek-R1-Distill-Qwen-32B</a></td>
+    <td>54.5</td><td>39.6</td><td>73.1</td><td>55.7</td><td>57.2</td><td>45.2</td><td>20.7</td><td>55.1</td></tr>
+    <tr><td>[T] <a href="results/DeepSeek-R1-Distill-Llama-70B_gpt4o.zip" download>DeepSeek-R1-Distill-Llama-70B</a></td>
+    <td>55.4</td><td>37.7</td><td>69.2</td><td>56.5</td><td>56.6</td><td>44.1</td><td>19.9</td><td>55.0</td></tr>
+    <tr><td>[N] <a href="results/Meta-Llama-3.1-8B-Instruct_gpt4o.zip" download>Meta-Llama-3.1-8B-Instruct</a></td>
+    <td>53.5</td><td>36.6</td><td>71.4</td><td>55.6</td><td>54.8</td><td>43.5</td><td>19.9</td><td>53.6</td></tr>
+    <tr><td>[S] <a href="results/Mistral-Crab-DPO_gpt4o.zip" download>Crab-DPO-7B</a></td>
+    <td>48.3</td><td>24.3</td><td>57.5</td><td>48.8</td><td>47.4</td><td>41.9</td><td>10.1</td><td>47.2</td></tr>
+    <tr><td>[N] <a href="results/Mistral-7B-Instruct-v0.3_gpt4o.zip" download>Mistral-7B-Instruct-v0.3</a></td>
+    <td>47.9</td><td>29.2</td><td>53.8</td><td>47.0</td><td>48.6</td><td>39.8</td><td>11.5</td><td>46.8</td></tr>
+    <tr><td>[S] <a href="results/Conifer_dpo_gpt4o.zip" download>Conifer-DPO-7B</a></td>
+    <td>45.6</td><td>27.0</td><td>50.5</td><td>42.0</td><td>46.9</td><td>41.8</td><td>10.7</td><td>44.3</td></tr>
   </tbody>
   <tfoot>
     <tr>
