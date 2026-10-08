@@ -158,7 +158,9 @@ sortTable.date = function(Cell) {
  * @returns {Number}
  */
 sortTable.number = function(Cell) {
-    return Number(sortTable.stripTags(Cell.innerHTML).replace(/[^-\d.]/g, ''));
+    // Use the first numeric token so that cells like "26.17 ± 0.99" sort by their mean
+    var m = sortTable.stripTags(Cell.innerHTML).match(/-?\d+(\.\d+)?/);
+    return m ? Number(m[0]) : Number.NEGATIVE_INFINITY;
 };
 
 /**

@@ -27,11 +27,25 @@
       pointer-events: none;
       background-image: none !important;
     }
-    #results th { text-align: center; vertical-align: middle; }
-    #results td { vertical-align: middle; }
-    #results tbody td:first-child { text-align: center; color: #858383; }
-    #results tbody td:nth-child(2) { text-align: left; }
+    table.leaderboard th { text-align: center; vertical-align: middle; }
+    table.leaderboard td { vertical-align: middle; white-space: nowrap; }
+    table.leaderboard tbody td:first-child { text-align: center; color: #858383; }
+    table.leaderboard tbody td:nth-child(2) { text-align: left; }
+    table.leaderboard .std { color: #8a8a8a; font-size: 0.85em; }
     .tag-legend { font-weight: 700; color: #3273dc; margin-right: 2px; }
+    .table-scroll { overflow-x: auto; }
+    .news-box {
+      text-align: left;
+      border-left: 4px solid #22a56e;
+      background: #f3faf6;
+      padding: 12px 16px;
+      margin: 0 0 20px 0;
+      border-radius: 4px;
+    }
+    .setting-list { text-align: left; }
+    .setting-list li { margin-bottom: 6px; }
+    details.legacy { margin-top: 36px; text-align: left; }
+    details.legacy summary { cursor: pointer; font-weight: 600; font-size: 1.15em; }
     pre {
       background-color: #f4f4f4;
       padding: 10px;
@@ -135,6 +149,21 @@
 </section>
 
 
+<!-- NEWS -->
+<section class="section" style="padding-top: 0; padding-bottom: 0;">
+  <div class="container is-max-desktop">
+    <div class="news-box">
+      <strong>🔥 2026-10 — Updated evaluation setting.</strong>
+      AgentIF now evaluates models in both <strong>thinking</strong> and <strong>non-thinking</strong> modes with their
+      vendor-recommended decoding parameters, over <strong>3 independent runs</strong>, judged by
+      <code>gpt-5.6-luna</code>, through a config-driven pipeline (<code>run.sh</code> + <code>configs/</code>).
+      See <a href="#evaluation-setting">Evaluation Setting</a> and the new <a href="#leaderboard">Leaderboard</a>.
+      Scores under the new setting are <strong>not comparable</strong> with those of the original setting.
+    </div>
+  </div>
+</section>
+
+
 <!-- INTRODUCTION -->
 <section class="section">
   <div class="container" style="margin-bottom: 2vh;">
@@ -192,6 +221,45 @@
 </section>
 
 
+<!-- EVALUATION SETTING -->
+<section class="hero is-light is-small">
+  <div class="hero-body has-text-centered">
+    <h1 class="title is-1" id="evaluation-setting">Evaluation Setting</h1>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container is-max-desktop content">
+    <p>
+      The original setting (<code>gpt-4o-2024-11-20</code> as the judge, greedy decoding with temperature 0 for the
+      evaluated model, default mode only) no longer reflects how current models are released and used: vendors ship
+      explicit thinking / non-thinking modes and recommended sampling parameters, and nobody deploys these models at
+      temperature 0. To evaluate models the way they are actually used, we updated the setting as follows:
+    </p>
+    <ul class="setting-list">
+      <li><strong>Judge model:</strong> <code>gpt-5.6-luna</code> with temperature 1, <code>reasoning_effort=medium</code>,
+        <code>max_completion_tokens=8192</code>. Every <code>llm</code> constraint is judged by it; <code>code</code>
+        constraints run the annotated check function.</li>
+      <li><strong>Modes:</strong> models that support both thinking and non-thinking are evaluated in <strong>both</strong>
+        modes and reported as separate rows (<code>chat_template_kwargs.enable_thinking</code> or the vendor's own switch).</li>
+      <li><strong>Decoding:</strong> the <strong>vendor-recommended sampling parameters</strong> of each model and mode
+        (temperature, top_p, top_k, min_p, presence / repetition penalty). When the vendor gives none:
+        thinking <code>T=1.0, top_p=0.95</code>; non-thinking <code>T=0.0, top_p=0.95</code>.</li>
+      <li><strong>Output budget:</strong> 32768 tokens in thinking mode, 16384 in non-thinking mode, trimmed automatically
+        when prompt + budget exceeds the model's context window.</li>
+      <li><strong>Runs:</strong> 3 independent samples per (model, mode); we report mean ± sample std.</li>
+      <li><strong>Empty or failed responses</strong> are scored as an empty response (every constraint fails); nothing is dropped.</li>
+    </ul>
+    <p>
+      The exact parameters of every evaluated model are the committed
+      <a href="https://github.com/THU-KEG/AgentIF/tree/main/configs" target="_blank" rel="noopener noreferrer"><code>configs/&lt;model&gt;.yaml</code></a>
+      files; the judge parameters are in
+      <a href="https://github.com/THU-KEG/AgentIF/tree/main/judge_configs" target="_blank" rel="noopener noreferrer"><code>judge_configs/gpt-5.6-luna.yaml</code></a>.
+    </p>
+  </div>
+</section>
+
+
 <!-- LEADERBOARD -->
 <section class="section">
   <div class="container">
@@ -203,58 +271,140 @@
             constraints that are correctly satisfied by the model's response.
             <strong>Instruction Success Rate (ISR)</strong> measures the proportion of instructions for which
             all constraints are satisfied.</p>
-          <p class="mt-3">Click any column header to sort. Click a model to download its full results, or browse the
-            <a href="https://github.com/agentif/agentif.github.io/tree/main/docs/results" target="_blank" rel="noopener noreferrer">complete results repository</a>.</p>
+          <p class="mt-3">
+            So far we have evaluated small open-weight models (2B–4B) under the new setting; results for larger
+            open-weight and proprietary models are being evaluated and will be released soon.
+          </p>
 
-          <table class="js-sort-table" id="results" style="margin-left: auto; margin-right: auto;">
+          <h3 class="title is-4" style="margin-top: 30px;">Small open-weight models — current setting</h3>
+          <p>
+            Judge <code>gpt-5.6-luna</code>; every (model, mode) is sampled 3 times independently with the
+            vendor-recommended decoding parameters. <strong>[T]</strong> = thinking mode, <strong>[N]</strong> = non-thinking mode.
+            ISR and CSR are mean ± sample std over the 3 runs (sorted by ISR by default); the remaining columns are the
+            mean CSR per constraint presentation type (Vanilla / Condition / Example) and per constraint type
+            (Formatting / Semantic / Tool). Click any column header to sort; click a model to see its exact vLLM flags
+            and sampling parameters.
+          </p>
+
+          <div class="table-scroll">
+          <table class="js-sort-table leaderboard" id="results" style="margin-left: auto; margin-right: auto;">
             <thead>
               <tr>
                 <th class="no-sort js-sort-none" colspan="2"></th>
-                <th colspan="3"><strong>Dimension</strong></th>
-                <th colspan="3"><strong>Type</strong></th>
                 <th colspan="2"><strong>Overall</strong></th>
+                <th colspan="3"><strong>Presentation Type</strong></th>
+                <th colspan="3"><strong>Constraint Type</strong></th>
               </tr>
               <tr>
                 <th class="no-sort js-sort-none" data-js-sort-colNum="0" style="width: 40px;"><strong>#</strong></th>
                 <th class="js-sort-string" data-js-sort-colNum="1"><strong>Model</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="2"><strong>Vanilla</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="3"><strong>Condition</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="4"><strong>Example</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="5"><strong>Formatting</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="6"><strong>Semantic</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="7"><strong>Tool</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="8"><strong>ISR</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="9"><strong>CSR</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="2"><strong>ISR</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="3"><strong>CSR</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="4"><strong>Vanilla</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="5"><strong>Condition</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="6"><strong>Example</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="7"><strong>Formatting</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="8"><strong>Semantic</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="9"><strong>Tool</strong></th>
               </tr>
             </thead>
             <tbody>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/o1-mini_gpt4o.zip" download>o1-mini</a></td><td>59.8</td><td>37.5</td><td>80.8</td><td>66.1</td><td>59.1</td><td>43.2</td><td>26.9</td><td>59.8</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/gpt-4o-2024-11-20_gpt4o.zip" download>GPT-4o</a></td><td>58.0</td><td>35.1</td><td>80.8</td><td>65.8</td><td>56.5</td><td>43.2</td><td>26.4</td><td>58.5</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/Qwen3-32B_gpt4o.zip" download>Qwen3-32B</a></td><td>57.5</td><td>41.1</td><td>80.6</td><td>57.7</td><td>62.5</td><td>45.7</td><td>24.9</td><td>58.4</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/QwQ-32B_gpt4o.zip" download>QwQ-32B</a></td><td>57.5</td><td>35.6</td><td>82.7</td><td>61.4</td><td>59.4</td><td>43.2</td><td>27.2</td><td>58.1</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/deepseek-r1_gpt4o.zip" download>DeepSeek-R1</a></td><td>56.1</td><td>41.4</td><td>87.0</td><td>61.4</td><td>58.9</td><td>44.4</td><td>22.2</td><td>57.9</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/GLM-Z1-32B-0414_gpt4o.zip" download>GLM-Z1-32B</a></td><td>56.7</td><td>37.9</td><td>83.6</td><td>60.2</td><td>59.6</td><td>43.1</td><td>23.8</td><td>57.8</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/deepseek-v3-250324_gpt4o.zip" download>DeepSeek-V3</a></td><td>54.9</td><td>41.5</td><td>84.5</td><td>59.3</td><td>58.9</td><td>40.8</td><td>21.9</td><td>56.7</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/claude-3-5-sonnet-20241022_gpt4o.zip" download>Claude-3-5-Sonnet</a></td><td>57.3</td><td>36.9</td><td>69.2</td><td>61.5</td><td>56.0</td><td>43.3</td><td>24.9</td><td>56.6</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/Meta-Llama-3.1-70B-Instruct_gpt4o.zip" download>Meta-Llama-3.1-70B-Instruct</a></td><td>55.1</td><td>35.0</td><td>84.3</td><td>61.6</td><td>55.6</td><td>42.8</td><td>20.9</td><td>56.3</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/DeepSeek-R1-Distill-Qwen-32B_gpt4o.zip" download>DeepSeek-R1-Distill-Qwen-32B</a></td><td>54.5</td><td>39.6</td><td>73.1</td><td>55.7</td><td>57.2</td><td>45.2</td><td>20.7</td><td>55.1</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/DeepSeek-R1-Distill-Llama-70B_gpt4o.zip" download>DeepSeek-R1-Distill-Llama-70B</a></td><td>55.4</td><td>37.7</td><td>69.2</td><td>56.5</td><td>56.6</td><td>44.1</td><td>19.9</td><td>55.0</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/Meta-Llama-3.1-8B-Instruct_gpt4o.zip" download>Meta-Llama-3.1-8B-Instruct</a></td><td>53.5</td><td>36.6</td><td>71.4</td><td>55.6</td><td>54.8</td><td>43.5</td><td>19.9</td><td>53.6</td></tr>
-              <tr><td></td><td><span class="tag-legend">[S]</span><a href="results/Mistral-Crab-DPO_gpt4o.zip" download>Crab-DPO-7B</a></td><td>48.3</td><td>24.3</td><td>57.5</td><td>48.8</td><td>47.4</td><td>41.9</td><td>10.1</td><td>47.2</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/Mistral-7B-Instruct-v0.3_gpt4o.zip" download>Mistral-7B-Instruct-v0.3</a></td><td>47.9</td><td>29.2</td><td>53.8</td><td>47.0</td><td>48.6</td><td>39.8</td><td>11.5</td><td>46.8</td></tr>
-              <tr><td></td><td><span class="tag-legend">[S]</span><a href="results/Conifer_dpo_gpt4o.zip" download>Conifer-DPO-7B</a></td><td>45.6</td><td>27.0</td><td>50.5</td><td>42.0</td><td>46.9</td><td>41.8</td><td>10.7</td><td>44.3</td></tr>
+              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-nemotron-4b-bf16-ea.yaml" target="_blank" rel="noopener noreferrer">gemma-nemotron-4b-bf16-ea</a></td><td>26.17<span class="std"> ± 0.99</span></td><td>58.66<span class="std"> ± 0.26</span></td><td>59.09</td><td>41.35</td><td>75.96</td><td>60.66</td><td>59.96</td><td>48.41</td></tr>
+              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/granite-4.2-3b.yaml" target="_blank" rel="noopener noreferrer">granite-4.2-3b</a></td><td>25.84<span class="std"> ± 1.27</span></td><td>56.12<span class="std"> ± 0.45</span></td><td>59.13</td><td>36.73</td><td>53.60</td><td>57.40</td><td>55.91</td><td>53.30</td></tr>
+              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E4B-it.yaml" target="_blank" rel="noopener noreferrer">gemma-4-E4B-it</a></td><td>25.74<span class="std"> ± 0.28</span></td><td>60.06<span class="std"> ± 0.89</span></td><td>61.07</td><td>46.03</td><td>69.37</td><td>61.36</td><td>62.65</td><td>46.84</td></tr>
+              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-nemotron-4b-bf16-ea.yaml" target="_blank" rel="noopener noreferrer">gemma-nemotron-4b-bf16-ea</a></td><td>24.94<span class="std"> ± 0.70</span></td><td>59.21<span class="std"> ± 0.51</span></td><td>60.14</td><td>43.81</td><td>70.68</td><td>60.85</td><td>61.66</td><td>45.85</td></tr>
+              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-4B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-4B</a></td><td>24.85<span class="std"> ± 0.43</span></td><td>59.21<span class="std"> ± 0.78</span></td><td>59.64</td><td>43.55</td><td>74.41</td><td>60.23</td><td>60.75</td><td>50.78</td></tr>
+              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E2B-it.yaml" target="_blank" rel="noopener noreferrer">gemma-4-E2B-it</a></td><td>24.28<span class="std"> ± 1.34</span></td><td>58.67<span class="std"> ± 0.23</span></td><td>59.74</td><td>43.59</td><td>68.26</td><td>61.04</td><td>59.24</td><td>49.81</td></tr>
+              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E4B-it.yaml" target="_blank" rel="noopener noreferrer">gemma-4-E4B-it</a></td><td>24.14<span class="std"> ± 0.91</span></td><td>58.71<span class="std"> ± 0.36</span></td><td>58.90</td><td>43.14</td><td>75.70</td><td>58.67</td><td>60.88</td><td>51.18</td></tr>
+              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E2B-it.yaml" target="_blank" rel="noopener noreferrer">gemma-4-E2B-it</a></td><td>23.81<span class="std"> ± 1.27</span></td><td>58.08<span class="std"> ± 0.60</span></td><td>59.63</td><td>42.40</td><td>65.36</td><td>59.22</td><td>60.43</td><td>46.31</td></tr>
+              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-4B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-4B</a></td><td>22.82<span class="std"> ± 0.91</span></td><td>58.92<span class="std"> ± 0.48</span></td><td>59.67</td><td>44.41</td><td>70.15</td><td>59.53</td><td>61.12</td><td>49.30</td></tr>
+              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/NVIDIA-Nemotron-3-Nano-4B-BF16.yaml" target="_blank" rel="noopener noreferrer">NVIDIA-Nemotron-3-Nano-4B</a></td><td>22.77<span class="std"> ± 0.28</span></td><td>56.07<span class="std"> ± 0.21</span></td><td>57.03</td><td>35.70</td><td>71.31</td><td>63.95</td><td>52.07</td><td>47.34</td></tr>
+              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/NVIDIA-Nemotron-3-Nano-4B-BF16.yaml" target="_blank" rel="noopener noreferrer">NVIDIA-Nemotron-3-Nano-4B</a></td><td>22.68<span class="std"> ± 0.43</span></td><td>53.85<span class="std"> ± 0.27</span></td><td>55.87</td><td>35.33</td><td>58.19</td><td>57.73</td><td>51.09</td><td>52.74</td></tr>
+              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/granite-4.2-3b.yaml" target="_blank" rel="noopener noreferrer">granite-4.2-3b</a></td><td>21.97<span class="std"> ± 0.92</span></td><td>53.42<span class="std"> ± 0.37</span></td><td>56.49</td><td>36.12</td><td>49.05</td><td>51.43</td><td>55.57</td><td>51.59</td></tr>
+              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Ministral-3-3B-Reasoning-2512.yaml" target="_blank" rel="noopener noreferrer">Ministral-3-3B-Reasoning-2512</a></td><td>19.94<span class="std"> ± 0.62</span></td><td>52.49<span class="std"> ± 0.35</span></td><td>53.44</td><td>35.20</td><td>64.22</td><td>52.52</td><td>52.92</td><td>50.87</td></tr>
+              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-2B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-2B</a></td><td>19.53<span class="std"> ± 0.87</span></td><td>53.86<span class="std"> ± 0.06</span></td><td>55.88</td><td>38.88</td><td>56.06</td><td>57.18</td><td>53.75</td><td>44.67</td></tr>
+              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/MiniCPM5-2B.yaml" target="_blank" rel="noopener noreferrer">MiniCPM5-2B</a></td><td>19.52<span class="std"> ± 0.28</span></td><td>51.98<span class="std"> ± 0.37</span></td><td>53.48</td><td>37.51</td><td>56.30</td><td>52.96</td><td>52.55</td><td>47.16</td></tr>
+              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Ministral-3-3B-Instruct-2512.yaml" target="_blank" rel="noopener noreferrer">Ministral-3-3B-Instruct-2512</a></td><td>18.86<span class="std"> ± 0.94</span></td><td>54.62<span class="std"> ± 0.26</span></td><td>55.64</td><td>41.45</td><td>62.32</td><td>50.31</td><td>58.53</td><td>53.09</td></tr>
+              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/MiniCPM5-2B.yaml" target="_blank" rel="noopener noreferrer">MiniCPM5-2B</a></td><td>18.25<span class="std"> ± 0.14</span></td><td>50.81<span class="std"> ± 0.70</span></td><td>53.28</td><td>37.29</td><td>46.07</td><td>51.88</td><td>51.18</td><td>46.50</td></tr>
+              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Hunyuan-4B-Instruct.yaml" target="_blank" rel="noopener noreferrer">Hunyuan-4B-Instruct</a></td><td>18.15<span class="std"> ± 0.36</span></td><td>53.08<span class="std"> ± 0.11</span></td><td>54.40</td><td>34.55</td><td>63.00</td><td>56.20</td><td>53.43</td><td>42.74</td></tr>
+              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-2B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-2B</a></td><td>15.94<span class="std"> ± 0.71</span></td><td>49.28<span class="std"> ± 0.41</span></td><td>51.98</td><td>33.76</td><td>46.40</td><td>51.13</td><td>48.38</td><td>47.19</td></tr>
+              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Hunyuan-4B-Instruct.yaml" target="_blank" rel="noopener noreferrer">Hunyuan-4B-Instruct</a></td><td>10.23<span class="std"> ± 0.43</span></td><td>44.08<span class="std"> ± 0.13</span></td><td>46.36</td><td>29.35</td><td>42.24</td><td>38.40</td><td>49.52</td><td>41.05</td></tr>
             </tbody>
           </table>
+          </div>
 
           <p style="text-align: left; font-size: 0.9em; margin-top: 12px;">
-            Success rates (%) of various proprietary and open-source LLMs on
-            <span style="font-variant: small-caps;">AgentIF</span>, sorted by CSR in descending order by default.
-            <strong>[N]</strong> denotes non-thinking models, <strong>[T]</strong> denotes thinking models, and
-            <strong>[S]</strong> denotes models explicitly designed for instruction following by the academic community.
+            Success rates (%) on <span style="font-variant: small-caps;">AgentIF</span> under the current setting.
+            The two Ministral checkpoints are single-mode models (Instruct = non-thinking, Reasoning = thinking).
+            Empty or failed responses are scored as failing every constraint. The exact vLLM flags and sampling
+            parameters of every row are the committed
+            <a href="https://github.com/THU-KEG/AgentIF/tree/main/configs" target="_blank" rel="noopener noreferrer"><code>configs/&lt;model&gt;.yaml</code></a> files.
           </p>
           <p style="margin-top: 10px;">
-            <strong style="color: #22a56e; font-size: 18px;">Last Update: 2025-06-10</strong>
+            <strong style="color: #22a56e; font-size: 18px;">Last Update: 2026-10-09</strong>
           </p>
+
+          <details class="legacy">
+            <summary>Legacy results — original setting (judge <code>gpt-4o-2024-11-20</code>, single greedy run)</summary>
+            <p style="margin-top: 12px;">
+              Produced with the original protocol: judge <code>gpt-4o-2024-11-20</code> with temperature 0, one greedy run
+              per model, API models called with their default mode. Kept for reference only;
+              <strong>not comparable</strong> with the table above. Click a model to download its full results, or browse the
+              <a href="https://github.com/agentif/agentif.github.io/tree/main/docs/results" target="_blank" rel="noopener noreferrer">complete results repository</a>.
+            </p>
+
+            <div class="table-scroll">
+            <table class="js-sort-table leaderboard" id="results-legacy" style="margin-left: auto; margin-right: auto;">
+              <thead>
+                <tr>
+                  <th class="no-sort js-sort-none" colspan="2"></th>
+                  <th colspan="3"><strong>Presentation Type</strong></th>
+                  <th colspan="3"><strong>Constraint Type</strong></th>
+                  <th colspan="2"><strong>Overall</strong></th>
+                </tr>
+                <tr>
+                  <th class="no-sort js-sort-none" data-js-sort-colNum="0" style="width: 40px;"><strong>#</strong></th>
+                  <th class="js-sort-string" data-js-sort-colNum="1"><strong>Model</strong></th>
+                  <th class="js-sort-number" data-js-sort-colNum="2"><strong>Vanilla</strong></th>
+                  <th class="js-sort-number" data-js-sort-colNum="3"><strong>Condition</strong></th>
+                  <th class="js-sort-number" data-js-sort-colNum="4"><strong>Example</strong></th>
+                  <th class="js-sort-number" data-js-sort-colNum="5"><strong>Formatting</strong></th>
+                  <th class="js-sort-number" data-js-sort-colNum="6"><strong>Semantic</strong></th>
+                  <th class="js-sort-number" data-js-sort-colNum="7"><strong>Tool</strong></th>
+                  <th class="js-sort-number" data-js-sort-colNum="8"><strong>ISR</strong></th>
+                  <th class="js-sort-number" data-js-sort-colNum="9"><strong>CSR</strong></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/o1-mini_gpt4o.zip" download>o1-mini</a></td><td>59.8</td><td>37.5</td><td>80.8</td><td>66.1</td><td>59.1</td><td>43.2</td><td>26.9</td><td>59.8</td></tr>
+                <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/gpt-4o-2024-11-20_gpt4o.zip" download>GPT-4o</a></td><td>58.0</td><td>35.1</td><td>80.8</td><td>65.8</td><td>56.5</td><td>43.2</td><td>26.4</td><td>58.5</td></tr>
+                <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/Qwen3-32B_gpt4o.zip" download>Qwen3-32B</a></td><td>57.5</td><td>41.1</td><td>80.6</td><td>57.7</td><td>62.5</td><td>45.7</td><td>24.9</td><td>58.4</td></tr>
+                <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/QwQ-32B_gpt4o.zip" download>QwQ-32B</a></td><td>57.5</td><td>35.6</td><td>82.7</td><td>61.4</td><td>59.4</td><td>43.2</td><td>27.2</td><td>58.1</td></tr>
+                <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/deepseek-r1_gpt4o.zip" download>DeepSeek-R1</a></td><td>56.1</td><td>41.4</td><td>87.0</td><td>61.4</td><td>58.9</td><td>44.4</td><td>22.2</td><td>57.9</td></tr>
+                <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/GLM-Z1-32B-0414_gpt4o.zip" download>GLM-Z1-32B</a></td><td>56.7</td><td>37.9</td><td>83.6</td><td>60.2</td><td>59.6</td><td>43.1</td><td>23.8</td><td>57.8</td></tr>
+                <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/deepseek-v3-250324_gpt4o.zip" download>DeepSeek-V3</a></td><td>54.9</td><td>41.5</td><td>84.5</td><td>59.3</td><td>58.9</td><td>40.8</td><td>21.9</td><td>56.7</td></tr>
+                <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/claude-3-5-sonnet-20241022_gpt4o.zip" download>Claude-3-5-Sonnet</a></td><td>57.3</td><td>36.9</td><td>69.2</td><td>61.5</td><td>56.0</td><td>43.3</td><td>24.9</td><td>56.6</td></tr>
+                <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/Meta-Llama-3.1-70B-Instruct_gpt4o.zip" download>Meta-Llama-3.1-70B-Instruct</a></td><td>55.1</td><td>35.0</td><td>84.3</td><td>61.6</td><td>55.6</td><td>42.8</td><td>20.9</td><td>56.3</td></tr>
+                <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/DeepSeek-R1-Distill-Qwen-32B_gpt4o.zip" download>DeepSeek-R1-Distill-Qwen-32B</a></td><td>54.5</td><td>39.6</td><td>73.1</td><td>55.7</td><td>57.2</td><td>45.2</td><td>20.7</td><td>55.1</td></tr>
+                <tr><td></td><td><span class="tag-legend">[T]</span><a href="results/DeepSeek-R1-Distill-Llama-70B_gpt4o.zip" download>DeepSeek-R1-Distill-Llama-70B</a></td><td>55.4</td><td>37.7</td><td>69.2</td><td>56.5</td><td>56.6</td><td>44.1</td><td>19.9</td><td>55.0</td></tr>
+                <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/Meta-Llama-3.1-8B-Instruct_gpt4o.zip" download>Meta-Llama-3.1-8B-Instruct</a></td><td>53.5</td><td>36.6</td><td>71.4</td><td>55.6</td><td>54.8</td><td>43.5</td><td>19.9</td><td>53.6</td></tr>
+                <tr><td></td><td><span class="tag-legend">[S]</span><a href="results/Mistral-Crab-DPO_gpt4o.zip" download>Crab-DPO-7B</a></td><td>48.3</td><td>24.3</td><td>57.5</td><td>48.8</td><td>47.4</td><td>41.9</td><td>10.1</td><td>47.2</td></tr>
+                <tr><td></td><td><span class="tag-legend">[N]</span><a href="results/Mistral-7B-Instruct-v0.3_gpt4o.zip" download>Mistral-7B-Instruct-v0.3</a></td><td>47.9</td><td>29.2</td><td>53.8</td><td>47.0</td><td>48.6</td><td>39.8</td><td>11.5</td><td>46.8</td></tr>
+                <tr><td></td><td><span class="tag-legend">[S]</span><a href="results/Conifer_dpo_gpt4o.zip" download>Conifer-DPO-7B</a></td><td>45.6</td><td>27.0</td><td>50.5</td><td>42.0</td><td>46.9</td><td>41.8</td><td>10.7</td><td>44.3</td></tr>
+              </tbody>
+            </table>
+            </div>
+
+            <p style="text-align: left; font-size: 0.9em; margin-top: 12px;">
+              Success rates (%) of various proprietary and open-source LLMs on
+              <span style="font-variant: small-caps;">AgentIF</span> under the original setting, sorted by CSR in descending order by default.
+              <strong>[N]</strong> denotes non-thinking models, <strong>[T]</strong> denotes thinking models, and
+              <strong>[S]</strong> denotes models explicitly designed for instruction following by the academic community.
+              Last update of this table: 2025-06-10.
+            </p>
+            <p style="margin-top: 10px;">Performance across constraint categories reported in the paper (original setting):</p>
+            <img src="images/experiment.png" alt="Performance across constraint categories (original setting)" style="max-width: 100%;">
+          </details>
         </div>
       </div>
     </div>
@@ -273,6 +423,10 @@
   <div class="container">
     <div class="columns is-centered has-text-centered">
       <div class="column is-four-fifths">
+        <p style="font-size: 0.9em; color: #666; margin-bottom: 20px;">
+          The analyses below are from the paper and were produced under the original setting
+          (judge <code>gpt-4o-2024-11-20</code>, single greedy run).
+        </p>
         <div class="content has-text-centered">
           <img src="images/analysis_error_types.png" alt="Error type analysis" style="max-width: 100%;">
           <p style="margin-top: 10px;">
@@ -288,7 +442,7 @@
           <img src="images/analysis_length_constraint.png" alt="Success rate versus instruction length and constraint count" style="max-width: 100%;">
           <p style="margin-top: 10px;">
             <strong>Success rates on instructions with varying length or constraint counts.</strong>
-            Gray lines show results of the top 6 models in the leaderboard, and the colored lines present their average.
+            Gray lines show results of the top 6 models in the original leaderboard, and the colored lines present their average.
           </p>
         </div>
         <div class="content has-text-centered" style="margin-top: 30px;">
@@ -315,32 +469,57 @@
 <section class="section">
   <div class="container is-max-desktop content">
     <p>For each instruction, we annotate the associated constraints and corresponding evaluation metrics,
-      including code-based evaluation, LLM-based evaluation, and hybrid code-LLM evaluation.</p>
+      including code-based evaluation, LLM-based evaluation, and hybrid code-LLM evaluation.
+      The evaluation pipeline is config-driven: <code>run.sh</code> starts vLLM for each local model, runs all
+      (mode × run) predictions, and judges them on the API. See the
+      <a href="https://github.com/THU-KEG/AgentIF/" target="_blank" rel="noopener noreferrer">GitHub repository</a>
+      for the full documentation.</p>
 
     <h3 class="title is-4">How to evaluate</h3>
     <ol>
-      <li>Clone the remote repository to your local environment. The necessary data is already included, so no further actions are needed.
-        <pre><code>git clone https://github.com/THU-KEG/AgentIF.git</code></pre>
+      <li><strong>Install.</strong> The dataset (<code>data/eval.json</code>, 707 instructions) is included;
+        <code>data/smoke/eval.json</code> holds 5 instructions for a quick test.
+        <pre><code>git clone https://github.com/THU-KEG/AgentIF.git &amp;&amp; cd AgentIF
+pip install -r requirements.txt            # openai, pyyaml, requests, tqdm, ...
+pip install vllm                           # only for locally served models (vLLM &gt;= 0.26 for the models in configs/)</code></pre>
       </li>
-      <li>(Optional) To evaluate a model hosted locally, deploy it using vLLM:
-        <pre><code>CUDA_VISIBLE_DEVICES=&lt;CUDA_ID&gt; vllm serve "&lt;your_model_path&gt;" \
-    --served-model-name &lt;your_model_name&gt; \
-    --port 8008 \
-    --tensor-parallel-size &lt;num_gpus&gt; \
-    --max-model-len 32000 \
-    --gpu-memory-utilization 0.9</code></pre>
+      <li><strong>Configure.</strong> Put the judge key (and optionally a base URL and the local weights directory) in <code>.env</code>,
+        then pick or add a model config in <code>configs/</code>.
+        <pre><code>cp .env.example .env     # OPENAI_API_KEY (judge), optional OPENAI_BASE_URL, MODELS_DIR (local weights)</code></pre>
+        <ul>
+          <li><strong>Local model (vLLM)</strong> — copy one of the shipped configs (e.g. <code>configs/Qwen3.5-4B.yaml</code>).
+            Required keys: <code>model_path</code>, <code>max_model_len</code>, <code>modes</code>;
+            <code>vllm_args</code> are passed to <code>vllm serve</code> verbatim.</li>
+          <li><strong>API model</strong> — copy <code>configs/api-model.example.yaml</code>, set <code>api.base_url</code> /
+            <code>api.model</code>, and put the key in the environment variable named by <code>api.api_key_env</code>.</li>
+          <li>Each entry under <code>modes</code> is evaluated separately with its own sampling parameters
+            (<code>enable_thinking: true/false</code>, or <code>extra_body</code> for vendor-specific switches).
+            Single-mode models list one mode only.</li>
+        </ul>
+        Global behaviour (GPU pool, number of repeats, default judge, concurrency) lives in <code>configs/global.yaml</code>;
+        judge endpoints and parameters in <code>judge_configs/</code>. To reproduce the leaderboard, use the shipped configs
+        and the <code>gpt-5.6-luna</code> judge.
       </li>
-      <li>Specify the target model and the evaluator in the <code>run.sh</code> file. To reproduce our results, we recommend using <code>gpt-4o-2024-11-20</code>.
-        <pre><code>Model_Name=""              # Name of the model to evaluate
-Model_Name_URL=""          # Endpoint of the model (e.g., OpenAI API URL or local vLLM URL)
-Model_Name_API_Key="EMPTY" # Set to "EMPTY" for local vLLM; otherwise, provide your API key
-
-Evaluator_Model_Backbone=""  # Name of the evaluator model; use `gpt-4o-2024-11-20` for reproducibility
-Evaluator_URL=""             # Base URL of the evaluator; use `https://api.openai.com/v1` to match our setup
-Evaluator_API_Key=""         # API key for the evaluator</code></pre>
+      <li><strong>Run.</strong>
+        <pre><code>bash run.sh --list                                        # show configs
+bash run.sh --models Qwen3.5-4B --repeats 1 \
+    --input-dir data/smoke --results-root results_smoke     # smoke test
+bash run.sh --models Qwen3.5-4B                           # full benchmark for one model
+nohup bash run.sh &gt; logs/run.out 2&gt;&amp;1 &amp;                   # every enabled config
+bash run.sh --stage prediction                            # predictions only
+bash run.sh --stage evaluation                            # judge existing predictions (no GPU)
+bash run.sh --judge gpt-4o-2024-11-20                     # another judge (judge_configs/&lt;name&gt;.yaml)</code></pre>
+        Finished jobs are detected by their <code>accuracy.json</code> and interrupted judge jobs resume from
+        <code>results.partial.jsonl</code>, so re-running the same command continues where it stopped.
       </li>
-      <li>Then run the script to start the evaluation.
-        <pre><code>sh run.sh</code></pre>
+      <li><strong>Results.</strong> Per-run predictions and scores are written under <code>results/</code>;
+        <code>results/summary.md</code> reports mean ± std over runs for every (model, mode, judge).
+        <pre><code>results/
+  prediction/&lt;model&gt;__&lt;mode&gt;/run&lt;N&gt;/eval.json          # model responses + run_config.json
+  scores/&lt;model&gt;__&lt;mode&gt;/run&lt;N&gt;_&lt;judge&gt;/eval/
+      results.json                                      # per-constraint scores, judge outputs
+      accuracy.json                                     # CSR, ISR, breakdowns by presentation / constraint type
+  summary.md / summary.json                             # mean ± std over runs</code></pre>
       </li>
     </ol>
 
@@ -422,14 +601,15 @@ Evaluator_API_Key=""         # API key for the evaluator</code></pre>
         target.classList.toggle('is-active');
       });
     }
-    updateRowNumbers();
-    var table = document.querySelector('#results');
-    if (table) { table.addEventListener('click', updateRowNumbers); }
+    document.querySelectorAll('table.leaderboard').forEach(function (table) {
+      updateRowNumbers(table);
+      table.addEventListener('click', function () { updateRowNumbers(table); });
+    });
   });
 
-  // Renumber the leaderboard rank column after each sort
-  function updateRowNumbers() {
-    var rows = document.querySelectorAll('#results tbody tr');
+  // Renumber the rank column of a leaderboard table after each sort
+  function updateRowNumbers(table) {
+    var rows = table.querySelectorAll('tbody tr');
     rows.forEach(function (row, index) {
       row.querySelector('td').innerText = index + 1;
     });

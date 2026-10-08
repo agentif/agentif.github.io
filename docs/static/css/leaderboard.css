@@ -17,26 +17,26 @@ thead {
     background: #ddd;
 }
 
-table#results.js-sort-0 tbody tr td:nth-child(1),
-table#results.js-sort-1 tbody tr td:nth-child(2),
-table#results.js-sort-2 tbody tr td:nth-child(3),
-table#results.js-sort-3 tbody tr td:nth-child(4),
-table#results.js-sort-4 tbody tr td:nth-child(5),
-table#results.js-sort-5 tbody tr td:nth-child(6),
-table#results.js-sort-6 tbody tr td:nth-child(7),
-table#results.js-sort-7 tbody tr td:nth-child(8),
-table#results.js-sort-8 tbody tr td:nth-child(9),
-table#results.js-sort-9 tbody tr td:nth-child(10),
-table#results.js-sort-10 tbody tr td:nth-child(11),
-table#results.js-sort-11 tbody tr td:nth-child(12),
-table#results.js-sort-12 tbody tr td:nth-child(13),
-table#results.js-sort-13 tbody tr td:nth-child(14),
-table#results.js-sort-14 tbody tr td:nth-child(15) {
+table.leaderboard.js-sort-0 tbody tr td:nth-child(1),
+table.leaderboard.js-sort-1 tbody tr td:nth-child(2),
+table.leaderboard.js-sort-2 tbody tr td:nth-child(3),
+table.leaderboard.js-sort-3 tbody tr td:nth-child(4),
+table.leaderboard.js-sort-4 tbody tr td:nth-child(5),
+table.leaderboard.js-sort-5 tbody tr td:nth-child(6),
+table.leaderboard.js-sort-6 tbody tr td:nth-child(7),
+table.leaderboard.js-sort-7 tbody tr td:nth-child(8),
+table.leaderboard.js-sort-8 tbody tr td:nth-child(9),
+table.leaderboard.js-sort-9 tbody tr td:nth-child(10),
+table.leaderboard.js-sort-10 tbody tr td:nth-child(11),
+table.leaderboard.js-sort-11 tbody tr td:nth-child(12),
+table.leaderboard.js-sort-12 tbody tr td:nth-child(13),
+table.leaderboard.js-sort-13 tbody tr td:nth-child(14),
+table.leaderboard.js-sort-14 tbody tr td:nth-child(15) {
     background: #dee;
 }
 
 /* Table for three sub-tasks */
-#results {
+table.leaderboard {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 16px;
     border-collapse: collapse;
@@ -48,7 +48,7 @@ table#results.js-sort-14 tbody tr td:nth-child(15) {
 }
 
 /*table tile*/
-#results th {
+table.leaderboard th {
     border: 1px solid #ddd;
     padding: 8px;
     padding-top: 12px;
@@ -60,16 +60,16 @@ table#results.js-sort-14 tbody tr td:nth-child(15) {
     color: white;
 }
 
-#results td {
+table.leaderboard td {
     border: 1px solid #ddd;
     padding: 8px;
 }
 
-#results tr:nth-child(even) {
+table.leaderboard tr:nth-child(even) {
     background-color: #f5f5f5;
 }
 
-#results tr:hover {
+table.leaderboard tr:hover {
     background-color: #ddd;
 }
 
