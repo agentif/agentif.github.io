@@ -34,6 +34,13 @@
     table.leaderboard .std { color: #8a8a8a; font-size: 0.85em; }
     .tag-legend { font-weight: 700; color: #3273dc; margin-right: 2px; }
     .table-scroll { overflow-x: auto; }
+    .size-tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 0.8em; font-weight: 600; }
+    .size-small { background: #e8f1fb; color: #2b63b5; }
+    .size-medium { background: #fdf1e2; color: #b0611a; }
+    .filter-buttons { margin: 16px 0 8px 0; }
+    .filter-buttons .button { margin: 0 4px 6px 4px; }
+    .filter-buttons .button.is-active { background: #363636; color: #fff; border-color: #363636; }
+    table.leaderboard tr.is-hidden-row { display: none; }
     .news-box {
       text-align: left;
       border-left: 4px solid #22a56e;
@@ -272,25 +279,31 @@
             <strong>Instruction Success Rate (ISR)</strong> measures the proportion of instructions for which
             all constraints are satisfied.</p>
           <p class="mt-3">
-            So far we have evaluated small open-weight models (2B–4B) under the new setting; results for larger
-            open-weight and proprietary models are being evaluated and will be released soon.
+            The current leaderboard covers small (1.5–4B) and medium (&gt;4–32B) open-weight models; results for
+            larger open-weight and proprietary models will be added as they are evaluated.
           </p>
 
-          <h3 class="title is-4" style="margin-top: 30px;">Small open-weight models — current setting</h3>
+          <h3 class="title is-4" style="margin-top: 30px;">Open-weight models — current setting</h3>
           <p>
             Judge <code>gpt-5.6-luna</code>; every (model, mode) is sampled 3 times independently with the
             vendor-recommended decoding parameters. <strong>[T]</strong> = thinking mode, <strong>[N]</strong> = non-thinking mode.
             ISR and CSR are mean ± sample std over the 3 runs (sorted by ISR by default); the remaining columns are the
             mean CSR per constraint presentation type (Vanilla / Condition / Example) and per constraint type
-            (Formatting / Semantic / Tool). Click any column header to sort; click a model to see its exact vLLM flags
-            and sampling parameters.
+            (Formatting / Semantic / Tool). Use the buttons to filter by model size, click any column header to sort,
+            and click a model to see its exact vLLM flags and sampling parameters.
           </p>
+
+          <div class="filter-buttons buttons is-centered" id="size-filter">
+            <button class="button is-small is-rounded is-active" data-group="all">All models</button>
+            <button class="button is-small is-rounded" data-group="small">Small Open (1.5–4B)</button>
+            <button class="button is-small is-rounded" data-group="medium">Medium Open (&gt;4–32B)</button>
+          </div>
 
           <div class="table-scroll">
           <table class="js-sort-table leaderboard" id="results" style="margin-left: auto; margin-right: auto;">
             <thead>
               <tr>
-                <th class="no-sort js-sort-none" colspan="2"></th>
+                <th class="no-sort js-sort-none" colspan="3"></th>
                 <th colspan="2"><strong>Overall</strong></th>
                 <th colspan="3"><strong>Presentation Type</strong></th>
                 <th colspan="3"><strong>Constraint Type</strong></th>
@@ -298,50 +311,65 @@
               <tr>
                 <th class="no-sort js-sort-none" data-js-sort-colNum="0" style="width: 40px;"><strong>#</strong></th>
                 <th class="js-sort-string" data-js-sort-colNum="1"><strong>Model</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="2"><strong>ISR</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="3"><strong>CSR</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="4"><strong>Vanilla</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="5"><strong>Condition</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="6"><strong>Example</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="7"><strong>Formatting</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="8"><strong>Semantic</strong></th>
-                <th class="js-sort-number" data-js-sort-colNum="9"><strong>Tool</strong></th>
+                <th class="js-sort-string" data-js-sort-colNum="2"><strong>Size</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="3"><strong>ISR</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="4"><strong>CSR</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="5"><strong>Vanilla</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="6"><strong>Condition</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="7"><strong>Example</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="8"><strong>Formatting</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="9"><strong>Semantic</strong></th>
+                <th class="js-sort-number" data-js-sort-colNum="10"><strong>Tool</strong></th>
               </tr>
             </thead>
             <tbody>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-nemotron-4b-bf16-ea.yaml" target="_blank" rel="noopener noreferrer">gemma-nemotron-4b-bf16-ea</a></td><td>26.17<span class="std"> ± 0.99</span></td><td>58.66<span class="std"> ± 0.26</span></td><td>59.09</td><td>41.35</td><td>75.96</td><td>60.66</td><td>59.96</td><td>48.41</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/granite-4.2-3b.yaml" target="_blank" rel="noopener noreferrer">granite-4.2-3b</a></td><td>25.84<span class="std"> ± 1.27</span></td><td>56.12<span class="std"> ± 0.45</span></td><td>59.13</td><td>36.73</td><td>53.60</td><td>57.40</td><td>55.91</td><td>53.30</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E4B-it.yaml" target="_blank" rel="noopener noreferrer">gemma-4-E4B-it</a></td><td>25.74<span class="std"> ± 0.28</span></td><td>60.06<span class="std"> ± 0.89</span></td><td>61.07</td><td>46.03</td><td>69.37</td><td>61.36</td><td>62.65</td><td>46.84</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-nemotron-4b-bf16-ea.yaml" target="_blank" rel="noopener noreferrer">gemma-nemotron-4b-bf16-ea</a></td><td>24.94<span class="std"> ± 0.70</span></td><td>59.21<span class="std"> ± 0.51</span></td><td>60.14</td><td>43.81</td><td>70.68</td><td>60.85</td><td>61.66</td><td>45.85</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-4B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-4B</a></td><td>24.85<span class="std"> ± 0.43</span></td><td>59.21<span class="std"> ± 0.78</span></td><td>59.64</td><td>43.55</td><td>74.41</td><td>60.23</td><td>60.75</td><td>50.78</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E2B-it.yaml" target="_blank" rel="noopener noreferrer">gemma-4-E2B-it</a></td><td>24.28<span class="std"> ± 1.34</span></td><td>58.67<span class="std"> ± 0.23</span></td><td>59.74</td><td>43.59</td><td>68.26</td><td>61.04</td><td>59.24</td><td>49.81</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E4B-it.yaml" target="_blank" rel="noopener noreferrer">gemma-4-E4B-it</a></td><td>24.14<span class="std"> ± 0.91</span></td><td>58.71<span class="std"> ± 0.36</span></td><td>58.90</td><td>43.14</td><td>75.70</td><td>58.67</td><td>60.88</td><td>51.18</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E2B-it.yaml" target="_blank" rel="noopener noreferrer">gemma-4-E2B-it</a></td><td>23.81<span class="std"> ± 1.27</span></td><td>58.08<span class="std"> ± 0.60</span></td><td>59.63</td><td>42.40</td><td>65.36</td><td>59.22</td><td>60.43</td><td>46.31</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-4B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-4B</a></td><td>22.82<span class="std"> ± 0.91</span></td><td>58.92<span class="std"> ± 0.48</span></td><td>59.67</td><td>44.41</td><td>70.15</td><td>59.53</td><td>61.12</td><td>49.30</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/NVIDIA-Nemotron-3-Nano-4B-BF16.yaml" target="_blank" rel="noopener noreferrer">NVIDIA-Nemotron-3-Nano-4B</a></td><td>22.77<span class="std"> ± 0.28</span></td><td>56.07<span class="std"> ± 0.21</span></td><td>57.03</td><td>35.70</td><td>71.31</td><td>63.95</td><td>52.07</td><td>47.34</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/NVIDIA-Nemotron-3-Nano-4B-BF16.yaml" target="_blank" rel="noopener noreferrer">NVIDIA-Nemotron-3-Nano-4B</a></td><td>22.68<span class="std"> ± 0.43</span></td><td>53.85<span class="std"> ± 0.27</span></td><td>55.87</td><td>35.33</td><td>58.19</td><td>57.73</td><td>51.09</td><td>52.74</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/granite-4.2-3b.yaml" target="_blank" rel="noopener noreferrer">granite-4.2-3b</a></td><td>21.97<span class="std"> ± 0.92</span></td><td>53.42<span class="std"> ± 0.37</span></td><td>56.49</td><td>36.12</td><td>49.05</td><td>51.43</td><td>55.57</td><td>51.59</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Ministral-3-3B-Reasoning-2512.yaml" target="_blank" rel="noopener noreferrer">Ministral-3-3B-Reasoning-2512</a></td><td>19.94<span class="std"> ± 0.62</span></td><td>52.49<span class="std"> ± 0.35</span></td><td>53.44</td><td>35.20</td><td>64.22</td><td>52.52</td><td>52.92</td><td>50.87</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-2B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-2B</a></td><td>19.53<span class="std"> ± 0.87</span></td><td>53.86<span class="std"> ± 0.06</span></td><td>55.88</td><td>38.88</td><td>56.06</td><td>57.18</td><td>53.75</td><td>44.67</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/MiniCPM5-2B.yaml" target="_blank" rel="noopener noreferrer">MiniCPM5-2B</a></td><td>19.52<span class="std"> ± 0.28</span></td><td>51.98<span class="std"> ± 0.37</span></td><td>53.48</td><td>37.51</td><td>56.30</td><td>52.96</td><td>52.55</td><td>47.16</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Ministral-3-3B-Instruct-2512.yaml" target="_blank" rel="noopener noreferrer">Ministral-3-3B-Instruct-2512</a></td><td>18.86<span class="std"> ± 0.94</span></td><td>54.62<span class="std"> ± 0.26</span></td><td>55.64</td><td>41.45</td><td>62.32</td><td>50.31</td><td>58.53</td><td>53.09</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/MiniCPM5-2B.yaml" target="_blank" rel="noopener noreferrer">MiniCPM5-2B</a></td><td>18.25<span class="std"> ± 0.14</span></td><td>50.81<span class="std"> ± 0.70</span></td><td>53.28</td><td>37.29</td><td>46.07</td><td>51.88</td><td>51.18</td><td>46.50</td></tr>
-              <tr><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Hunyuan-4B-Instruct.yaml" target="_blank" rel="noopener noreferrer">Hunyuan-4B-Instruct</a></td><td>18.15<span class="std"> ± 0.36</span></td><td>53.08<span class="std"> ± 0.11</span></td><td>54.40</td><td>34.55</td><td>63.00</td><td>56.20</td><td>53.43</td><td>42.74</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-2B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-2B</a></td><td>15.94<span class="std"> ± 0.71</span></td><td>49.28<span class="std"> ± 0.41</span></td><td>51.98</td><td>33.76</td><td>46.40</td><td>51.13</td><td>48.38</td><td>47.19</td></tr>
-              <tr><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Hunyuan-4B-Instruct.yaml" target="_blank" rel="noopener noreferrer">Hunyuan-4B-Instruct</a></td><td>10.23<span class="std"> ± 0.43</span></td><td>44.08<span class="std"> ± 0.13</span></td><td>46.36</td><td>29.35</td><td>42.24</td><td>38.40</td><td>49.52</td><td>41.05</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.8-27B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.8-27B</a></td><td><span class="size-tag size-medium">Medium</span></td><td>31.35<span class="std"> ± 0.36</span></td><td>65.78<span class="std"> ± 0.42</span></td><td>67.03</td><td>48.91</td><td>77.37</td><td>69.31</td><td>67.17</td><td>51.98</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-9B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-9B</a></td><td><span class="size-tag size-medium">Medium</span></td><td>30.36<span class="std"> ± 0.59</span></td><td>65.34<span class="std"> ± 0.30</span></td><td>66.72</td><td>48.53</td><td>76.38</td><td>69.46</td><td>65.60</td><td>53.77</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-31B-it.yaml" target="_blank" rel="noopener noreferrer">Gemma-4-31B-it</a></td><td><span class="size-tag size-medium">Medium</span></td><td>29.80<span class="std"> ± 0.33</span></td><td>64.81<span class="std"> ± 0.39</span></td><td>64.60</td><td>51.29</td><td>82.12</td><td>68.89</td><td>66.12</td><td>50.75</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/granite-4.2-3b.yaml" target="_blank" rel="noopener noreferrer">Granite-4.2-3B</a></td><td><span class="size-tag size-small">Small</span></td><td>28.95<span class="std"> ± 1.66</span></td><td>58.82<span class="std"> ± 0.54</span></td><td>63.01</td><td>39.49</td><td>53.01</td><td>60.31</td><td>58.93</td><td>53.55</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-nemotron-4b-bf16-ea.yaml" target="_blank" rel="noopener noreferrer">gemma-nemotron-4b-bf16-ea</a></td><td><span class="size-tag size-small">Small</span></td><td>28.43<span class="std"> ± 0.79</span></td><td>62.07<span class="std"> ± 0.19</span></td><td>62.62</td><td>48.20</td><td>75.22</td><td>65.30</td><td>63.03</td><td>52.19</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-12B-it.yaml" target="_blank" rel="noopener noreferrer">Gemma-4-12B-it</a></td><td><span class="size-tag size-medium">Medium</span></td><td>27.86<span class="std"> ± 0.71</span></td><td>63.16<span class="std"> ± 0.27</span></td><td>64.55</td><td>50.68</td><td>68.99</td><td>64.10</td><td>65.63</td><td>52.80</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E4B-it.yaml" target="_blank" rel="noopener noreferrer">Gemma-4-E4B-it</a></td><td><span class="size-tag size-small">Small</span></td><td>26.87<span class="std"> ± 0.14</span></td><td>62.94<span class="std"> ± 0.77</span></td><td>64.63</td><td>50.67</td><td>67.43</td><td>65.13</td><td>65.33</td><td>48.79</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.8-27B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.8-27B</a></td><td><span class="size-tag size-medium">Medium</span></td><td>26.54<span class="std"> ± 0.22</span></td><td>62.01<span class="std"> ± 0.67</span></td><td>63.05</td><td>49.97</td><td>69.46</td><td>64.57</td><td>62.86</td><td>53.38</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-4B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-4B</a></td><td><span class="size-tag size-small">Small</span></td><td>26.50<span class="std"> ± 0.33</span></td><td>62.33<span class="std"> ± 1.10</span></td><td>63.30</td><td>47.34</td><td>73.38</td><td>64.90</td><td>63.41</td><td>51.70</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/DeepSeek-R1-0528-Qwen3-8B.yaml" target="_blank" rel="noopener noreferrer">DeepSeek-R1-0528-Qwen3-8B</a></td><td><span class="size-tag size-medium">Medium</span></td><td>26.45<span class="std"> ± 0.62</span></td><td>59.93<span class="std"> ± 0.15</span></td><td>60.64</td><td>46.98</td><td>70.66</td><td>62.93</td><td>59.98</td><td>52.75</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-9B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-9B</a></td><td><span class="size-tag size-medium">Medium</span></td><td>26.40<span class="std"> ± 0.59</span></td><td>63.55<span class="std"> ± 0.64</span></td><td>65.27</td><td>48.19</td><td>70.53</td><td>65.07</td><td>65.46</td><td>52.04</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-31B-it.yaml" target="_blank" rel="noopener noreferrer">Gemma-4-31B-it</a></td><td><span class="size-tag size-medium">Medium</span></td><td>26.12<span class="std"> ± 0.73</span></td><td>64.70<span class="std"> ± 0.24</span></td><td>64.40</td><td>51.79</td><td>82.05</td><td>67.49</td><td>66.29</td><td>51.67</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-nemotron-4b-bf16-ea.yaml" target="_blank" rel="noopener noreferrer">gemma-nemotron-4b-bf16-ea</a></td><td><span class="size-tag size-small">Small</span></td><td>26.03<span class="std"> ± 1.02</span></td><td>62.05<span class="std"> ± 0.54</span></td><td>63.69</td><td>49.12</td><td>67.70</td><td>64.29</td><td>64.42</td><td>48.83</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/NVIDIA-Nemotron-Nano-9B-v2.yaml" target="_blank" rel="noopener noreferrer">Nemotron-Nano-9B-v2</a></td><td><span class="size-tag size-medium">Medium</span></td><td>25.75<span class="std"> ± 0.53</span></td><td>61.17<span class="std"> ± 0.73</span></td><td>61.46</td><td>46.38</td><td>75.96</td><td>68.51</td><td>58.00</td><td>56.52</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E4B-it.yaml" target="_blank" rel="noopener noreferrer">Gemma-4-E4B-it</a></td><td><span class="size-tag size-small">Small</span></td><td>25.74<span class="std"> ± 0.88</span></td><td>61.62<span class="std"> ± 0.39</span></td><td>62.11</td><td>48.15</td><td>74.61</td><td>61.62</td><td>63.83</td><td>53.61</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E2B-it.yaml" target="_blank" rel="noopener noreferrer">Gemma-4-E2B-it</a></td><td><span class="size-tag size-small">Small</span></td><td>25.55<span class="std"> ± 1.28</span></td><td>61.01<span class="std"> ± 0.18</span></td><td>62.68</td><td>47.61</td><td>66.57</td><td>64.08</td><td>61.66</td><td>51.03</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/NVIDIA-Nemotron-3-Nano-4B-BF16.yaml" target="_blank" rel="noopener noreferrer">Nemotron-3-Nano-4B</a></td><td><span class="size-tag size-small">Small</span></td><td>25.13<span class="std"> ± 0.36</span></td><td>55.59<span class="std"> ± 0.36</span></td><td>58.58</td><td>38.50</td><td>54.98</td><td>59.07</td><td>53.79</td><td>52.76</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/NVIDIA-Nemotron-Nano-9B-v2.yaml" target="_blank" rel="noopener noreferrer">Nemotron-Nano-9B-v2</a></td><td><span class="size-tag size-medium">Medium</span></td><td>24.99<span class="std"> ± 0.41</span></td><td>60.41<span class="std"> ± 0.40</span></td><td>61.08</td><td>42.85</td><td>74.30</td><td>68.43</td><td>57.07</td><td>54.28</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-E2B-it.yaml" target="_blank" rel="noopener noreferrer">Gemma-4-E2B-it</a></td><td><span class="size-tag size-small">Small</span></td><td>24.99<span class="std"> ± 1.19</span></td><td>60.32<span class="std"> ± 0.75</span></td><td>63.01</td><td>45.25</td><td>61.85</td><td>61.46</td><td>62.98</td><td>46.82</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gemma-4-12B-it.yaml" target="_blank" rel="noopener noreferrer">Gemma-4-12B-it</a></td><td><span class="size-tag size-medium">Medium</span></td><td>24.71<span class="std"> ± 0.70</span></td><td>62.33<span class="std"> ± 0.52</span></td><td>61.91</td><td>50.99</td><td>78.13</td><td>62.99</td><td>64.35</td><td>54.28</td></tr>
+              <tr data-group="medium"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/gpt-oss-20b.yaml" target="_blank" rel="noopener noreferrer">gpt-oss-20b</a></td><td><span class="size-tag size-medium">Medium</span></td><td>24.56<span class="std"> ± 0.85</span></td><td>54.97<span class="std"> ± 0.30</span></td><td>58.18</td><td>46.01</td><td>43.95</td><td>51.18</td><td>57.50</td><td>55.44</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/NVIDIA-Nemotron-3-Nano-4B-BF16.yaml" target="_blank" rel="noopener noreferrer">Nemotron-3-Nano-4B</a></td><td><span class="size-tag size-small">Small</span></td><td>24.47<span class="std"> ± 0.28</span></td><td>58.50<span class="std"> ± 0.30</span></td><td>59.76</td><td>39.21</td><td>71.40</td><td>68.98</td><td>54.37</td><td>47.96</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/granite-4.2-3b.yaml" target="_blank" rel="noopener noreferrer">Granite-4.2-3B</a></td><td><span class="size-tag size-small">Small</span></td><td>23.24<span class="std"> ± 0.80</span></td><td>55.22<span class="std"> ± 0.39</span></td><td>59.41</td><td>38.01</td><td>48.51</td><td>51.82</td><td>57.91</td><td>51.10</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-4B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-4B</a></td><td><span class="size-tag size-small">Small</span></td><td>22.87<span class="std"> ± 0.86</span></td><td>60.96<span class="std"> ± 0.50</span></td><td>62.69</td><td>47.89</td><td>64.93</td><td>62.23</td><td>62.96</td><td>50.08</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/MiniCPM5-2B.yaml" target="_blank" rel="noopener noreferrer">MiniCPM5-2B</a></td><td><span class="size-tag size-small">Small</span></td><td>22.07<span class="std"> ± 0.14</span></td><td>54.26<span class="std"> ± 0.44</span></td><td>55.88</td><td>44.57</td><td>54.99</td><td>54.42</td><td>55.32</td><td>50.74</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-2B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-2B</a></td><td><span class="size-tag size-small">Small</span></td><td>21.59<span class="std"> ± 0.94</span></td><td>55.83<span class="std"> ± 0.13</span></td><td>58.75</td><td>42.43</td><td>53.12</td><td>59.09</td><td>56.43</td><td>44.86</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Ministral-3-3B-Reasoning-2512.yaml" target="_blank" rel="noopener noreferrer">Ministral-3-3B-Reasoning-2512</a></td><td><span class="size-tag size-small">Small</span></td><td>20.51<span class="std"> ± 0.28</span></td><td>53.84<span class="std"> ± 0.47</span></td><td>55.51</td><td>38.59</td><td>59.50</td><td>52.03</td><td>55.29</td><td>51.78</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/MiniCPM5-2B.yaml" target="_blank" rel="noopener noreferrer">MiniCPM5-2B</a></td><td><span class="size-tag size-small">Small</span></td><td>19.66<span class="std"> ± 0.28</span></td><td>52.36<span class="std"> ± 0.87</span></td><td>55.27</td><td>44.51</td><td>42.57</td><td>52.20</td><td>53.31</td><td>50.08</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Ministral-3-3B-Instruct-2512.yaml" target="_blank" rel="noopener noreferrer">Ministral-3-3B-Instruct-2512</a></td><td><span class="size-tag size-small">Small</span></td><td>19.28<span class="std"> ± 0.85</span></td><td>55.94<span class="std"> ± 0.26</span></td><td>57.85</td><td>44.50</td><td>57.61</td><td>50.15</td><td>60.02</td><td>52.49</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[T]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Hunyuan-4B-Instruct.yaml" target="_blank" rel="noopener noreferrer">Hunyuan-4B-Instruct</a></td><td><span class="size-tag size-small">Small</span></td><td>18.10<span class="std"> ± 0.24</span></td><td>54.34<span class="std"> ± 0.20</span></td><td>56.02</td><td>38.72</td><td>60.01</td><td>57.99</td><td>54.97</td><td>44.02</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Qwen3.5-2B.yaml" target="_blank" rel="noopener noreferrer">Qwen3.5-2B</a></td><td><span class="size-tag size-small">Small</span></td><td>16.31<span class="std"> ± 0.90</span></td><td>50.07<span class="std"> ± 0.44</span></td><td>53.72</td><td>35.84</td><td>43.63</td><td>50.50</td><td>50.15</td><td>46.02</td></tr>
+              <tr data-group="small"><td></td><td><span class="tag-legend">[N]</span><a href="https://github.com/THU-KEG/AgentIF/blob/main/configs/Hunyuan-4B-Instruct.yaml" target="_blank" rel="noopener noreferrer">Hunyuan-4B-Instruct</a></td><td><span class="size-tag size-small">Small</span></td><td>10.23<span class="std"> ± 0.43</span></td><td>43.92<span class="std"> ± 0.17</span></td><td>46.41</td><td>33.59</td><td>39.02</td><td>34.17</td><td>50.61</td><td>42.42</td></tr>
             </tbody>
           </table>
           </div>
 
           <p style="text-align: left; font-size: 0.9em; margin-top: 12px;">
             Success rates (%) on <span style="font-variant: small-caps;">AgentIF</span> under the current setting.
-            The two Ministral checkpoints are single-mode models (Instruct = non-thinking, Reasoning = thinking).
-            Empty or failed responses are scored as failing every constraint. The exact vLLM flags and sampling
-            parameters of every row are the committed
+            <strong>Size</strong> groups follow total parameter count: Small Open = 1.5–4B, Medium Open = &gt;4–32B.
+            The two Ministral checkpoints are single-mode models (Instruct = non-thinking, Reasoning = thinking);
+            DeepSeek-R1-0528-Qwen3-8B is a dedicated reasoning checkpoint and gpt-oss-20b is run at its default
+            <code>reasoning_effort=medium</code>, so both appear only as [T]. Empty or failed responses are scored as
+            failing every constraint. The exact vLLM flags and sampling parameters of every row are the committed
             <a href="https://github.com/THU-KEG/AgentIF/tree/main/configs" target="_blank" rel="noopener noreferrer"><code>configs/&lt;model&gt;.yaml</code></a> files.
           </p>
           <p style="margin-top: 10px;">
-            <strong style="color: #22a56e; font-size: 18px;">Last Update: 2026-10-09</strong>
+            <strong style="color: #22a56e; font-size: 18px;">Last Update: 2026-10-11</strong>
           </p>
 
           <details class="legacy">
@@ -605,13 +633,31 @@ bash run.sh --judge gpt-4o-2024-11-20                     # another judge (judge
       updateRowNumbers(table);
       table.addEventListener('click', function () { updateRowNumbers(table); });
     });
+
+    // Size filter for the current leaderboard
+    var filter = document.getElementById('size-filter');
+    var results = document.getElementById('results');
+    if (filter && results) {
+      filter.querySelectorAll('button[data-group]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var group = btn.getAttribute('data-group');
+          filter.querySelectorAll('button').forEach(function (b) { b.classList.toggle('is-active', b === btn); });
+          results.querySelectorAll('tbody tr').forEach(function (row) {
+            row.classList.toggle('is-hidden-row', group !== 'all' && row.getAttribute('data-group') !== group);
+          });
+          updateRowNumbers(results);
+        });
+      });
+    }
   });
 
-  // Renumber the rank column of a leaderboard table after each sort
+  // Renumber the rank column of a leaderboard table after each sort or filter (visible rows only)
   function updateRowNumbers(table) {
-    var rows = table.querySelectorAll('tbody tr');
-    rows.forEach(function (row, index) {
-      row.querySelector('td').innerText = index + 1;
+    var index = 0;
+    table.querySelectorAll('tbody tr').forEach(function (row) {
+      if (row.classList.contains('is-hidden-row')) { return; }
+      index += 1;
+      row.querySelector('td').innerText = index;
     });
   }
 </script>
