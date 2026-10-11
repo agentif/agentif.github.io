@@ -674,6 +674,18 @@ bash run.sh --judge gpt-4o-2024-11-20                     # another judge (judge
       var applyControls = function () {
         var metric = sortSel.value, mode = modeSel.value, size = sizeSel.value;
         var tbody = results.tBodies[0];
+        // put the selected metric first among the Overall columns (cells 3 and 4: CSR, ISR).
+        // Swap the body cells and only the header labels, so the header click handlers keep their column numbers.
+        var headRow = results.tHead.rows[results.tHead.rows.length - 1];
+        var firstMetric = headRow.cells[3].textContent.trim().toLowerCase();
+        if (firstMetric !== metric) {
+          var tmp = headRow.cells[3].innerHTML;
+          headRow.cells[3].innerHTML = headRow.cells[4].innerHTML;
+          headRow.cells[4].innerHTML = tmp;
+          Array.prototype.forEach.call(tbody.rows, function (row) {
+            row.insertBefore(row.cells[4], row.cells[3]);
+          });
+        }
         var rows = Array.prototype.slice.call(tbody.rows);
         rows.sort(function (a, b) {
           return parseFloat(b.getAttribute('data-' + metric)) - parseFloat(a.getAttribute('data-' + metric));
