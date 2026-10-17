@@ -65,7 +65,10 @@ table.leaderboard td {
     padding: 8px;
 }
 
-table.leaderboard tr:nth-child(even) {
+/* Zebra striping is applied by JS over VISIBLE rows (see updateRowNumbers),
+   because nth-child(even) counts hidden/reordered rows and mis-stripes a filtered table.
+   Low specificity so tr:hover still wins. */
+.lb-even {
     background-color: #f5f5f5;
 }
 
